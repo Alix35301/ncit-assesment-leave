@@ -33,3 +33,8 @@ sail npm run dev
   - Admin user
   - Normal user
 - Admin user is defined using `is_admin` boolean on users table
+
+## Database Tables
+
+- **leave_balance** - Manages user leave balances
+- **leaves** - Stores leave applications and approval status
