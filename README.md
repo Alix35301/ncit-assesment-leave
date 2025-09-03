@@ -11,6 +11,16 @@ sail artisan migrate:fresh --seed
 sail npm run dev
 ```
 
+## User Credentials
+
+**Admin User**
+- Email: admin@ncit.com
+- Password: password
+
+**Normal User**
+- Email: user@ncit.com
+- Password: password
+
 ## Notes
 
 - System has two user types:
