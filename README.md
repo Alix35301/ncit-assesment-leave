@@ -17,6 +17,12 @@ sail artisan migrate:fresh --seed
 sail npm run dev
 ```
 
+## Running Tests
+
+```bash
+sail artisan test --filter=test_can_approve_leave_request
+```
+
 ## User Credentials
 
 **Admin User**
