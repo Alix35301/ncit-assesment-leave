@@ -1,6 +1,12 @@
 # Leave Management
 
-Leave management system for NCIT users to apply for leave and admins to approve or reject applications.
+Leave management system for NCIT users to apply for leave and admins to approve or reject applications. 
+
+# Stack
+
+Laravel
+Vue
+Inertia
 
 ## How to Run
 
