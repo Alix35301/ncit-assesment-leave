@@ -36,12 +36,34 @@ const submit = () => {
     }, {
         onSuccess: () => {
             document.location.reload();
-        },
-        onError: (errors) => {
-            alert(errors[0]);
         }
     });
 };
+
+const approve = (leave) => {
+    router.visit(route('leave-approvals.approve', { leave: leave.id }));
+    document.location.reload();
+};
+
+const reject = (leave) => {
+    router.visit(route('leave-approvals.reject', { leave: leave.id }));
+    document.location.reload();
+};
+
+
+const getLeaveBalance = (leave) => {
+    if(leave.type === 'annual') {
+        return leave.leave_balance?.annual_leave;
+    }
+    if(leave.type === 'sick') {
+        return leave.leave_balance.sick_leave;
+    }
+    if(leave.type === 'other') {
+        return leave.leave_balance.other_leave;
+    }
+};
+
+
 </script>
 
 <template>
@@ -50,79 +72,55 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Leave Approvals</h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                        <div class="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-                            <div class="text-lg font-semibold text-gray-700 mb-2">Annual Leave</div>
-                            <div class="text-3xl font-bold text-blue-600">{{ leaveBalances?.annual_leave }}</div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-                            <div class="text-lg font-semibold text-gray-700 mb-2">Sick Leave</div>
-                            <div class="text-3xl font-bold text-green-600">{{ leaveBalances?.sick_leave }}</div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-                            <div class="text-lg font-semibold text-gray-700 mb-2">Other Leave</div>
-                            <div class="text-3xl font-bold text-yellow-600">{{ leaveBalances?.other_leave }}</div>
-                        </div>
-                    </div>
                     <div class="p-6 text-gray-900">
 
-                        <div class="gap-2 mb-6 flex w-full justify-end">
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-md" @click="showModal = true">Apply
-                                for
-                                leave</button>
-
-                            <button v-if="user?.is_admin" class="bg-red-500 text-white px-4 py-2 rounded-md" @click="router.visit(route('leave-approvals.index'))">Approve Leave</button>
-                        </div>
 
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Staff Name
+                                    </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Type</th>
+                                        Leave Type</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Start Date</th>
                                         <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         End Date</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Leave Type</th>
-        
 
-                                    <th
+                                        <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Reason</th>
+                                        Leave Balance</th>
 
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Approved By</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Approved At</th>
+
+
+
 
                                         <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status</th>
+                                        <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <tr v-for="leave in leaves" :key="leave.id">
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ leave.user.name }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ leave.type }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ leave.start_date }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ leave.end_date }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ leave.type }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ leave.reason }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ leave.approved_by }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ leave.approved_at }}</td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ getLeaveBalance(leave) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             :class="{
@@ -134,6 +132,10 @@ const submit = () => {
                                         >
                                             {{ leave.status.charAt(0).toUpperCase() + leave.status.slice(1) }}
                                         </span>
+                                    </td>
+                                    <td v-if="leave.status === 'pending'" class="px-6 gap-2 flex  py-4 whitespace-nowrap">
+                                        <button class="bg-green-500 text-white px-4 py-2 rounded-md" @click="approve(leave)">Approve</button>
+                                        <button class="bg-red-500 text-white px-4 py-2 rounded-md" @click="reject(leave)">Reject</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -167,6 +169,10 @@ const submit = () => {
                     <div class="flex flex-col gap-2">
                         <label for="reason">Reason</label>
                         <input type="text" id="reason" name="reason" />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="type">Type</label>
+                        <input type="text" id="type" name="type" />
                     </div>
 
                     <div class="flex justify-end gap-2">
